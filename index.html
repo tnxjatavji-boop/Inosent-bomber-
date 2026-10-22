@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMS-B · Innocent Spark Bomber</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── global reset & light base ── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #2a2340;
+      padding: 1.5rem;
+      letter-spacing: 0.2px;
+      background: #fdf7ff;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* soft candy-like color washes */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -20%;
+      background:
+        radial-gradient(ellipse 55% 45% at 15% 20%, rgba(255, 140, 200, 0.18), transparent 70%),
+        radial-gradient(ellipse 50% 40% at 85% 15%, rgba(140, 180, 255, 0.16), transparent 70%),
+        radial-gradient(ellipse 60% 50% at 75% 85%, rgba(255, 200, 120, 0.14), transparent 70%),
+        radial-gradient(ellipse 45% 40% at 10% 80%, rgba(180, 140, 255, 0.12), transparent 70%);
+      animation: washShift 20s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(28px);
+    }
+
+    @keyframes washShift {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(3%, -2%) scale(1.06); }
+      100% { transform: translate(-2%, 3%) scale(1.03); }
+    }
+
+    /* sparkle dust */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 140, 200, 0.5) 1px, transparent 1px),
+                        radial-gradient(rgba(140, 180, 255, 0.4) 1px, transparent 1px);
+      background-size: 60px 60px, 90px 90px;
+      background-position: 0 0, 30px 30px;
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 0;
+      animation: dustDrift 80s linear infinite;
+    }
+
+    @keyframes dustDrift {
+      0%   { background-position: 0 0, 30px 30px; }
+      100% { background-position: 240px 240px, 270px 270px; }
+    }
+
+    /* ── dashboard wrapper ── */
+    .dashboard {
+      max-width: 860px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      position: relative;
+      z-index: 1;
+      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── header brand ── */
+    .header-brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0.8rem 0.2rem 0.8rem;
+    }
+
+    .logo {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ff6ec4, #7873f5, #4adede, #ffb86c);
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: logoShift 6s linear infinite;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @keyframes logoShift {
+      0%   { background-position: 0% center; }
+      100% { background-position: 300% center; }
+    }
+
+    .logo .spark {
+      display: inline-block;
+      animation: sparkSpin 3s ease-in-out infinite;
+      font-size: 1.6rem;
+      filter: drop-shadow(0 0 8px rgba(255, 140, 200, 0.6));
+    }
+
+    @keyframes sparkSpin {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      50%      { transform: rotate(180deg) scale(1.2); }
+    }
+
+    .badge {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.72rem;
+      padding: 0.45rem 1.1rem;
+      border-radius: 40px;
+      color: #8a3fb8;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow:
+        0 4px 16px -4px rgba(180, 100, 220, 0.25),
+        0 0 0 1px rgba(220, 180, 255, 0.6) inset;
+      animation: badgeFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes badgeFloat {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-3px); }
+    }
+
+    /* ── main console card — soft, airy, borderless ── */
+    .console-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      border-radius: 42px;
+      padding: 2.5rem 2.3rem 2.3rem 2.3rem;
+      box-shadow:
+        0 26px 64px -20px rgba(140, 80, 200, 0.22),
+        0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+        0 0 0 1px rgba(220, 190, 255, 0.4);
+      transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .console-card:hover {
+      box-shadow:
+        0 32px 74px -20px rgba(140, 80, 200, 0.28),
+        0 0 0 1px rgba(255, 255, 255, 0.95) inset,
+        0 0 0 1px rgba(200, 160, 255, 0.55);
+      transform: translateY(-4px);
+    }
+
+    /* ── fields grid ── */
+    .field-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.8rem 1rem;
+      animation: fieldSlide 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+    }
+
+    .input-group:nth-child(1) { animation-delay: 0.1s; }
+    .input-group:nth-child(2) { animation-delay: 0.2s; }
+    .input-group:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes fieldSlide {
+      from { opacity: 0; transform: translateX(-14px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .input-group label {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #9a7bb5;
+      min-width: 120px;
+      transition: color 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input-group:focus-within label {
+      color: #b14ae0;
+    }
+
+    /* light, borderless inputs */
+    .input-field {
+      flex: 1;
+      min-width: 180px;
+      background: rgba(255, 255, 255, 0.8);
+      border: none;
+      border-radius: 60px;
+      padding: 0.95rem 1.5rem;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #2a2340;
+      letter-spacing: 0.5px;
+      transition: background 0.25s, box-shadow 0.25s, transform 0.25s;
+      box-shadow:
+        0 4px 16px -6px rgba(140, 80, 200, 0.18),
+        0 0 0 1px rgba(225, 200, 255, 0.55) inset;
+      outline: none;
+    }
+
+    .input-field:hover {
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow:
+        0 6px 20px -6px rgba(140, 80, 200, 0.24),
+        0 0 0 1px rgba(200, 170, 255, 0.65) inset;
+    }
+
+    .input-field:focus {
+      background: #ffffff;
+      box-shadow:
+        0 6px 24px -6px rgba(180, 80, 255, 0.32),
+        0 0 0 2px rgba(200, 100, 255, 0.35) inset;
+      transform: translateY(-1px);
+    }
+
+    .input-field::placeholder {
+      color: #b8a3cc;
+      font-weight: 400;
+    }
+
+    #targetInput {
+      letter-spacing: 2px;
+      font-weight: 600;
+    }
+
+    /* ── action buttons row ── */
+    .action-bar {
+      display: flex;
+      gap: 1rem;
+      margin: 1.2rem 0 1.8rem 0;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 160px;
+      padding: 1rem 1.8rem;
+      border: none;
+      border-radius: 60px;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      outline: none;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.5s ease, height 0.5s ease;
+    }
+
+    .btn:active:not(:disabled)::after {
+      width: 340px;
+      height: 340px;
+      transition: width 0s, height 0s;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: grayscale(0.5);
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff6ec4, #b46eff, #6e8bff, #ff6ec4);
+      background-size: 300% auto;
+      color: #ffffff;
+      box-shadow:
+        0 10px 26px -8px rgba(200, 80, 220, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+      animation: gradientShift 5s linear infinite;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% center; }
+      100% { background-position: 300% center; }
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      box-shadow:
+        0 14px 34px -8px rgba(200, 80, 220, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+      transform: translateY(-2px) scale(1.01);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0) scale(0.99);
+    }
+
+    .btn-danger {
+      background: rgba(255, 235, 245, 0.9);
+      color: #d6356e;
+      box-shadow:
+        0 6px 18px -8px rgba(220, 40, 110, 0.3),
+        0 0 0 1px rgba(255, 200, 225, 0.8) inset;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(255, 225, 238, 1);
+      color: #c01f5a;
+      box-shadow:
+        0 10px 26px -8px rgba(220, 40, 110, 0.45),
+        0 0 0 1px rgba(255, 160, 200, 0.9) inset;
+      transform: translateY(-2px) scale(1.01);
+    }
+
+    /* ── progress & stats ── */
+    .progress-section {
+      margin: 1.9rem 0 1.2rem 0;
+    }
+
+    .progress-wrap {
+      background: rgba(240, 230, 255, 0.9);
+      border-radius: 100px;
+      height: 16px;
+      width: 100%;
+      margin: 0.75rem 0 0.5rem 0;
+      overflow: hidden;
+      box-shadow:
+        0 2px 12px -3px rgba(140, 80, 200, 0.2) inset,
+        0 0 0 1px rgba(220, 200, 255, 0.6) inset;
+      opacity: 0.5;
+      transition: opacity 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .progress-wrap.active {
+      opacity: 1;
+      box-shadow:
+        0 2px 12px -3px rgba(140, 80, 200, 0.2) inset,
+        0 0 0 1px rgba(200, 150, 255, 0.7) inset,
+        0 0 20px -4px rgba(200, 100, 255, 0.35);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff6ec4, #b46eff, #6e8bff, #4adede, #ff6ec4);
+      background-size: 400% 100%;
+      border-radius: 100px;
+      transition: width 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+      box-shadow: 0 0 16px rgba(200, 100, 255, 0.6);
+      animation: fillShift 3.5s linear infinite;
+    }
+
+    @keyframes fillShift {
+      0%   { background-position: 0% 0; }
+      100% { background-position: 400% 0; }
+    }
+
+    .progress-text {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #9a7bb5;
+      display: flex;
+      justify-content: flex-end;
+      letter-spacing: 1px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 0.9rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 100px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 26px;
+      padding: 1rem 1.2rem;
+      text-align: center;
+      transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.3s ease;
+      box-shadow:
+        0 10px 26px -12px rgba(140, 80, 200, 0.2),
+        0 0 0 1px rgba(225, 200, 255, 0.6) inset;
+      animation: statPop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.25s; }
+    .stat-card:nth-child(2) { animation-delay: 0.35s; }
+    .stat-card:nth-child(3) { animation-delay: 0.45s; }
+
+    @keyframes statPop {
+      from { opacity: 0; transform: scale(0.93) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 16px 32px -12px rgba(140, 80, 200, 0.28),
+        0 0 0 1px rgba(200, 160, 255, 0.8) inset;
+    }
+
+    .stat-label {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: #b8a3cc;
+      margin-bottom: 0.45rem;
+    }
+
+    .stat-value {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #b14ae0;
+      line-height: 1.15;
+      transition: transform 0.15s;
+    }
+
+    .stat-value.sent {
+      color: #00b894;
+    }
+
+    .stat-value.failed {
+      color: #e6395e;
+    }
+
+    .stat-value.bump {
+      animation: bump 0.28s ease;
+    }
+
+    @keyframes bump {
+      0%   { transform: scale(1); }
+      45%  { transform: scale(1.16); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── status line — soft candy ── */
+    .status-line {
+      margin-top: 1.7rem;
+      padding: 1rem 1.5rem;
+      background: rgba(250, 240, 255, 0.9);
+      border-radius: 60px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #7a5c99;
+      letter-spacing: 0.2px;
+      transition: all 0.3s ease;
+      min-height: 3.4rem;
+      display: flex;
+      align-items: center;
+      word-break: break-word;
+      box-shadow:
+        0 6px 20px -8px rgba(140, 80, 200, 0.15),
+        0 0 0 1px rgba(225, 200, 255, 0.55) inset;
+    }
+
+    .status-line.ok {
+      background: rgba(226, 249, 240, 0.95);
+      color: #0c7a5e;
+      box-shadow:
+        0 6px 20px -8px rgba(0, 150, 110, 0.2),
+        0 0 0 1px rgba(140, 230, 200, 0.55) inset;
+    }
+
+    .status-line.err {
+      background: rgba(255, 235, 245, 0.95);
+      color: #c01f5a;
+      box-shadow:
+        0 6px 20px -8px rgba(220, 40, 110, 0.2),
+        0 0 0 1px rgba(255, 190, 220, 0.65) inset;
+    }
+
+    /* ── footer — light & playful ── */
+    footer {
+      margin-top: 2.4rem;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem 1rem 0.4rem 1rem;
+      font-size: 0.78rem;
+      color: #b8a3cc;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .footer-brand {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    .footer-brand .dev {
+      font-family: 'Baloo 2', cursive;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff6ec4, #b46eff, #6e8bff, #4adede);
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 2.2px;
+      font-size: 0.98rem;
+      padding-left: 0.6rem;
+      position: relative;
+      animation: devShift 5s linear infinite;
+    }
+
+    .footer-brand .dev::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12%;
+      height: 76%;
+      width: 2px;
+      background: linear-gradient(180deg, #ff6ec4, #6e8bff);
+      border-radius: 2px;
+    }
+
+    @keyframes devShift {
+      0%   { background-position: 0% center; }
+      100% { background-position: 300% center; }
+    }
+
+    .footer-note {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.72rem;
+      color: #c4b3d6;
+      letter-spacing: 0.6px;
+    }
+
+    /* ── responsive tweaks ── */
+    @media (max-width: 600px) {
+      body { padding: 0.8rem; }
+      .console-card { padding: 1.8rem 1.3rem; border-radius: 30px; }
+      .input-group label { min-width: 100%; margin-bottom: -0.3rem; }
+      .btn { padding: 0.9rem; font-size: 0.82rem; letter-spacing: 1.4px; }
+      .stat-value { font-size: 1.65rem; }
+      .status-line { font-size: 0.84rem; padding: 0.9rem 1.2rem; }
+      .progress-wrap { height: 14px; }
+      .logo { font-size: 1.7rem; }
+      .badge { font-size: 0.62rem; padding: 0.35rem 0.85rem; }
+    }
+
+    @media (max-width: 420px) {
+      .header-brand { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+      .action-bar { flex-direction: column; }
+      .btn { width: 100%; }
+      .stat-card { min-width: 85px; padding: 0.85rem 0.8rem; }
+    }
+
+    /* reduced motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <!-- header -->
+  <div class="header-brand">
+    <span class="logo"><span class="spark">✨</span> SMS-B <span class="spark">💫</span></span>
+    <span class="badge">Rahulbhai · spark</span>
+  </div>
+
+  <!-- main console card -->
+  <div class="console-card">
+    <div class="field-grid">
+      <div class="input-group">
+        <label for="targetInput">📱 TARGET</label>
+        <input type="tel" id="targetInput" class="input-field" placeholder="10-digit number" maxlength="10" inputmode="numeric">
+      </div>
+      <div class="input-group">
+        <label for="countInput">🔢 COUNT</label>
+        <input type="number" id="countInput" class="input-field" value="100" min="1" max="10000" step="1" placeholder="1-10000">
+      </div>
+      <div class="input-group">
+        <label for="burstInput">⚡ BURST</label>
+        <input type="number" id="burstInput" class="input-field" value="25" min="1" max="50" step="1" placeholder="1-50">
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button id="fireBtn" class="btn btn-primary">🚀 FIRE SPARKS</button>
+      <button id="haltBtn" class="btn btn-danger" disabled>⏹ HALT</button>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">0 / 100 (0%)</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">SENT</div>
+        <div class="stat-value sent" id="statSent">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">FAILED</div>
+        <div class="stat-value failed" id="statFailed">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">TOTAL</div>
+        <div class="stat-value" id="statTotal">0</div>
+      </div>
+    </div>
+
+    <div class="status-line" id="statusLine">
+      ✨ Ready. Enter target and press fire.
+    </div>
+  </div>
+</div>
+
+<!-- footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span>Developed by</span>
+      <span class="dev">RAHULBHAI</span>
+    </div>
+    <div class="footer-note">© 2026 SMS-B · Educational use only</div>
+  </div>
+</footer>
+
+<script>
+const API_SMSB = "/api/smsb";
+
+const input = document.getElementById("targetInput");
+const countInput = document.getElementById("countInput");
+const burstInput = document.getElementById("burstInput");
+const fireBtn = document.getElementById("fireBtn");
+const haltBtn = document.getElementById("haltBtn");
+const progressWrap = document.getElementById("progressWrap");
+const progressFill = document.getElementById("progressFill");
+const progressText = document.getElementById("progressText");
+const statSent = document.getElementById("statSent");
+const statFailed = document.getElementById("statFailed");
+const statTotal = document.getElementById("statTotal");
+const statusLine = document.getElementById("statusLine");
+
+let running = false;
+let stopFlag = false;
+let sent = 0, failed = 0, done = 0, total = 0;
+
+/* bump animation helper */
+function bump(el) {
+  el.classList.remove("bump");
+  void el.offsetWidth;
+  el.classList.add("bump");
+  setTimeout(() => el.classList.remove("bump"), 280);
+}
+
+function setStatus(msg, cls) {
+  statusLine.className = "status-line " + (cls || "");
+  statusLine.innerHTML = msg || "";
+}
+function refreshStats() {
+  const prevSent = parseInt(statSent.textContent) || 0;
+  const prevFailed = parseInt(statFailed.textContent) || 0;
+  statSent.textContent = sent;
+  statFailed.textContent = failed;
+  statTotal.textContent = sent + failed;
+  if (sent !== prevSent) bump(statSent);
+  if (failed !== prevFailed) bump(statFailed);
+  bump(statTotal);
+}
+
+async function fireOne(number) {
+  try {
+    const r = await fetch(API_SMSB, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ number })
+    });
+    const txt = await r.text();
+    let ok = r.ok;
+    try {
+      const j = JSON.parse(txt);
+      if (j && (j.status === false || j.success === false)) ok = false;
+    } catch {}
+    return ok;
+  } catch { return false; }
+}
+
+fireBtn.addEventListener("click", async () => {
+  if (running) return;
+
+  const num = input.value.replace(/\D/g, "");
+  if (num.length !== 10) {
+    setStatus("Invalid input. Enter a valid 10-digit mobile number.", "err");
+    return;
+  }
+
+  total = Math.max(1, Math.min(10000, parseInt(countInput.value) || 100));
+  const burst = Math.max(1, Math.min(50, parseInt(burstInput.value) || 25));
+
+  running = true; stopFlag = false;
+  sent = 0; failed = 0; done = 0;
+
+  fireBtn.disabled = true;
+  haltBtn.disabled = false;
+  progressWrap.classList.add("active");
+  progressFill.style.width = "0%";
+  progressText.textContent = `0 / ${total}`;
+  refreshStats();
+  setStatus("Initializing sequence...", "");
+
+  const dispatch = async () => {
+    if (stopFlag) return;
+    const ok = await fireOne(num);
+    if (ok) sent++; else failed++;
+    done++;
+    const pct = Math.round((done / total) * 100);
+    progressFill.style.width = pct + "%";
+    progressText.textContent = `${done} / ${total} (${pct}%)`;
+    refreshStats();
+    if (done % 5 === 0 || done === total) {
+      setStatus(`Dispatching [${done}/${total}] · Sent: ${sent} | Failed: ${failed}`);
+    }
+  };
+
+  for (let i = 0; i < total; i += burst) {
+    if (stopFlag) break;
+    const batch = [];
+    for (let j = 0; j < burst && (i + j) < total; j++) batch.push(dispatch());
+    await Promise.allSettled(batch);
+  }
+
+  if (stopFlag) {
+    setStatus(`Sequence aborted · Sent=${sent} Failed=${failed}`, "err");
+  } else {
+    setStatus(`Sequence completed · Sent: ${sent} | Failed: ${failed}`, sent > 0 ? "ok" : "err");
+  }
+
+  running = false;
+  fireBtn.disabled = false;
+  haltBtn.disabled = true;
+  progressWrap.classList.remove("active");
+});
+
+haltBtn.addEventListener("click", () => {
+  if (!running) return;
+  stopFlag = true;
+  setStatus("Halting pipeline...", "err");
+});
+
+input.addEventListener("keydown", e => { if (e.key === "Enter") fireBtn.click(); });
+</script>
+
+</body>
+</html>
